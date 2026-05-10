@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goal Submission — Mars Athletics</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E; --red-dark: #9E0B22; --red-light: #FDEAED;
+    --bg: #F7F7F5; --surface: #FFFFFF; --border: #E5E3DF;
+    --text: #1A1A1A; --muted: #6B6B6B;
+    --green: #1D7A4A; --green-light: #E6F4EC;
+    --blue: #1A56A0; --blue-light: #E8F0FB;
+    --purple: #5B35B5; --purple-light: #EEE9FB;
+    --amber: #B45309; --amber-light: #FEF3C7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; min-height: 100vh; }
+
+  .header { background: var(--red); padding: 20px 24px; display: flex; align-items: center; gap: 14px; }
+  .header-logo { width: 42px; height: 42px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; color: var(--red); flex-shrink: 0; }
+  .header h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: white; letter-spacing: 0.5px; }
+  .header p { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+  .main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  .intro-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; border-left: 4px solid var(--red); }
+  .intro-card h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .intro-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .section-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+
+  .goal-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .goal-num { width: 30px; height: 30px; border-radius: 8px; background: var(--red); color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .goal-num.optional { background: var(--border); color: var(--muted); }
+  .goal-card-header span { font-weight: 600; font-size: 15px; }
+  .goal-card-header small { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+  .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); display: block; margin-bottom: 6px; }
+  input[type=text], input[type=date], select, textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 7px;
+    padding: 9px 12px; font-family: 'Barlow', sans-serif; font-size: 14px;
+    color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--red); background: white; }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+  .form-group { margin-bottom: 14px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+  .smart-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+  .smart-badge { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+  .badge-s { background: var(--purple-light); color: var(--purple); }
+  .badge-m { background: var(--blue-light); color: var(--blue); }
+  .badge-a { background: var(--green-light); color: var(--green); }
+  .badge-r { background: var(--amber-light); color: var(--amber); }
+  .badge-t { background: var(--red-light); color: var(--red-dark); }
+  .smart-hint { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .smart-inner { flex: 1; }
+
+  .toggle-smart { font-size: 12px; color: var(--red); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 12px; text-decoration: underline; }
+
+  .btn { font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 13px; padding: 11px 24px; border-radius: 7px; cursor: pointer; border: none; text-transform: uppercase; letter-spacing: 0.04em; transition: opacity 0.15s, transform 0.1s; }
+  .btn:active { transform: scale(0.98); }
+  .btn-red { background: var(--red); color: white; width: 100%; font-size: 15px; padding: 14px; }
+  .btn-red:hover { background: var(--red-dark); }
+
+  .success-screen { display: none; text-align: center; padding: 48px 20px; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-screen h2 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; text-transform: uppercase; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: var(--muted); max-width: 320px; margin: 0 auto 20px; line-height: 1.6; }
+  .btn-again { background: transparent; color: var(--red); border: 2px solid var(--red); border-radius: 7px; padding: 10px 24px; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 13px; text-transform: uppercase; cursor: pointer; }
+
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">MA</div>
+  <div>
+    <h1>Goal Submission</h1>
+    <p>Mars Athletics — share your top goals for the season</p>
+  </div>
+</div>
+
+<div class="main">
+  <div id="form-section">
+    <div class="intro-card">
+      <h2>Set your goals</h2>
+      <p>Submit your top 2–3 goals for the season. For each goal, use the SMART criteria to make sure it's specific, measurable, and achievable. Your coach will review and track your progress.</p>
+    </div>
+
+    <!-- Personal Info -->
+    <div class="card">
+      <div class="section-label">Your information</div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">First name</label>
+          <input type="text" id="fname" placeholder="First name">
+        </div>
+        <div>
+          <label class="form-label">Last name</label>
+          <input type="text" id="lname" placeholder="Last name">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Sport / Team</label>
+          <select id="sport">
+            <option value="">Select sport</option>
+            <option>Football</option>
+            <option>Basketball</option>
+            <option>Track & Field</option>
+            <option>Baseball</option>
+            <option>Softball</option>
+            <option>Soccer</option>
+            <option>Wrestling</option>
+            <option>Cross Country</option>
+            <option>Volleyball</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Grade</label>
+          <select id="grade">
+            <option value="">Select grade</option>
+            <option>9th</option>
+            <option>10th</option>
+            <option>11th</option>
+            <option>12th</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Goal 1 -->
+    <div class="card" id="goal-card-1">
+      <div class="goal-card-header">
+        <div class="goal-num">1</div>
+        <div><span>Goal #1</span><small>— Required</small></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal title</label>
+        <input type="text" id="g1-title" placeholder="e.g. Improve my 40-yard dash time">
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Category</label>
+          <select id="g1-cat">
+            <option value="athletic">Athletic performance</option>
+            <option value="academic">Academic</option>
+            <option value="personal">Personal development</option>
+            <option value="teamwork">Teamwork / leadership</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Target date</label>
+          <input type="date" id="g1-date">
+        </div>
+      </div>
+      <button class="toggle-smart" onclick="toggleSmart('g1')">+ Expand SMART criteria</button>
+      <div id="g1-smart" style="display:none;">
+        <div class="smart-row"><div class="smart-badge badge-s">S</div><div class="smart-inner"><div class="smart-hint"><strong>Specific</strong> — What exactly do you want to achieve?</div><textarea id="g1-s" placeholder="Be as specific as possible."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-m">M</div><div class="smart-inner"><div class="smart-hint"><strong>Measurable</strong> — How will you track progress?</div><textarea id="g1-m" placeholder="e.g. Run a 4.6 second 40-yard dash"></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-a">A</div><div class="smart-inner"><div class="smart-hint"><strong>Achievable</strong> — Is this realistic for you?</div><textarea id="g1-a" placeholder="Steps you'll take, resources you have..."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-r">R</div><div class="smart-inner"><div class="smart-hint"><strong>Relevant</strong> — Why does this matter to you?</div><textarea id="g1-r" placeholder="How does this connect to your bigger goals?"></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-t">T</div><div class="smart-inner"><div class="smart-hint"><strong>Time-bound</strong> — What's your deadline?</div><textarea id="g1-t" placeholder="Deadline and check-in schedule..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- Goal 2 -->
+    <div class="card" id="goal-card-2">
+      <div class="goal-card-header">
+        <div class="goal-num">2</div>
+        <div><span>Goal #2</span><small>— Required</small></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal title</label>
+        <input type="text" id="g2-title" placeholder="e.g. Start every game this season">
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Category</label>
+          <select id="g2-cat">
+            <option value="athletic">Athletic performance</option>
+            <option value="academic">Academic</option>
+            <option value="personal">Personal development</option>
+            <option value="teamwork">Teamwork / leadership</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Target date</label>
+          <input type="date" id="g2-date">
+        </div>
+      </div>
+      <button class="toggle-smart" onclick="toggleSmart('g2')">+ Expand SMART criteria</button>
+      <div id="g2-smart" style="display:none;">
+        <div class="smart-row"><div class="smart-badge badge-s">S</div><div class="smart-inner"><div class="smart-hint"><strong>Specific</strong></div><textarea id="g2-s" placeholder="Be as specific as possible."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-m">M</div><div class="smart-inner"><div class="smart-hint"><strong>Measurable</strong></div><textarea id="g2-m" placeholder="How will you measure success?"></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-a">A</div><div class="smart-inner"><div class="smart-hint"><strong>Achievable</strong></div><textarea id="g2-a" placeholder="Steps and resources..."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-r">R</div><div class="smart-inner"><div class="smart-hint"><strong>Relevant</strong></div><textarea id="g2-r" placeholder="Why this matters..."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-t">T</div><div class="smart-inner"><div class="smart-hint"><strong>Time-bound</strong></div><textarea id="g2-t" placeholder="Deadline..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- Goal 3 (optional) -->
+    <div class="card" id="goal-card-3">
+      <div class="goal-card-header">
+        <div class="goal-num optional">3</div>
+        <div><span>Goal #3</span><small>— Optional</small></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal title</label>
+        <input type="text" id="g3-title" placeholder="e.g. Maintain a 3.0 GPA this semester">
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="form-label">Category</label>
+          <select id="g3-cat">
+            <option value="athletic">Athletic performance</option>
+            <option value="academic">Academic</option>
+            <option value="personal">Personal development</option>
+            <option value="teamwork">Teamwork / leadership</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Target date</label>
+          <input type="date" id="g3-date">
+        </div>
+      </div>
+      <button class="toggle-smart" onclick="toggleSmart('g3')">+ Expand SMART criteria</button>
+      <div id="g3-smart" style="display:none;">
+        <div class="smart-row"><div class="smart-badge badge-s">S</div><div class="smart-inner"><div class="smart-hint"><strong>Specific</strong></div><textarea id="g3-s" placeholder="Be as specific as possible."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-m">M</div><div class="smart-inner"><div class="smart-hint"><strong>Measurable</strong></div><textarea id="g3-m" placeholder="How will you measure success?"></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-a">A</div><div class="smart-inner"><div class="smart-hint"><strong>Achievable</strong></div><textarea id="g3-a" placeholder="Steps and resources..."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-r">R</div><div class="smart-inner"><div class="smart-hint"><strong>Relevant</strong></div><textarea id="g3-r" placeholder="Why this matters..."></textarea></div></div>
+        <div class="smart-row"><div class="smart-badge badge-t">T</div><div class="smart-inner"><div class="smart-hint"><strong>Time-bound</strong></div><textarea id="g3-t" placeholder="Deadline..."></textarea></div></div>
+      </div>
+    </div>
+
+    <button class="btn btn-red" onclick="submitForm()">Submit My Goals →</button>
+  </div>
+
+  <div class="success-screen" id="success-section">
+    <div class="success-icon">🎯</div>
+    <h2>Goals submitted!</h2>
+    <p>Your coach will review your goals and track your progress throughout the season. Stay focused and keep working!</p>
+    <button class="btn-again" onclick="resetForm()">Submit another response</button>
+  </div>
+</div>
+
+<script>
+function toggleSmart(id) {
+  const el = document.getElementById(id+'-smart');
+  const btn = el.previousElementSibling;
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? 'block' : 'none';
+  btn.textContent = hidden ? '− Hide SMART criteria' : '+ Expand SMART criteria';
+}
+
+function submitForm() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const g1 = document.getElementById('g1-title').value.trim();
+  const g2 = document.getElementById('g2-title').value.trim();
+  if (!fname || !lname) { alert('Please enter your first and last name.'); return; }
+  if (!g1 || !g2) { alert('Please enter at least 2 goals.'); return; }
+
+  const getGoal = (n) => ({
+    title: document.getElementById('g'+n+'-title').value.trim(),
+    category: document.getElementById('g'+n+'-cat').value,
+    date: document.getElementById('g'+n+'-date').value,
+    s: document.getElementById('g'+n+'-s').value.trim(),
+    m: document.getElementById('g'+n+'-m').value.trim(),
+    a: document.getElementById('g'+n+'-a').value.trim(),
+    r: document.getElementById('g'+n+'-r').value.trim(),
+    t: document.getElementById('g'+n+'-t').value.trim(),
+    progress: 0
+  });
+
+  const submission = {
+    id: Date.now(),
+    fname, lname,
+    sport: document.getElementById('sport').value,
+    grade: document.getElementById('grade').value,
+    submitted: new Date().toISOString(),
+    goals: [getGoal(1), getGoal(2), getGoal(3)].filter(g => g.title)
+  };
+
+  // Save to shared storage key for coach dashboard
+  try {
+    const all = JSON.parse(localStorage.getItem('mars_submissions') || '[]');
+    all.push(submission);
+    localStorage.setItem('mars_submissions', JSON.stringify(all));
+  } catch(e) {}
+
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('success-section').style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('success-section').style.display = 'none';
+  ['fname','lname','g1-title','g2-title','g3-title'].forEach(id => document.getElementById(id).value = '');
+  ['g1','g2','g3'].forEach(n => {
+    ['s','m','a','r','t'].forEach(k => { const el = document.getElementById(n+'-'+k); if(el) el.value=''; });
+    document.getElementById(n+'-date').value = '';
+    const smart = document.getElementById(n+'-smart');
+    if(smart) { smart.style.display='none'; smart.previousElementSibling.textContent='+ Expand SMART criteria'; }
+  });
+}
+</script>
+</body>
+</html>

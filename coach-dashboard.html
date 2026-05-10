@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach Dashboard — Mars Athletics</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E; --red-dark: #9E0B22; --red-light: #FDEAED;
+    --bg: #F0EFEC; --surface: #FFFFFF; --border: #E5E3DF;
+    --text: #1A1A1A; --muted: #6B6B6B;
+    --green: #1D7A4A; --green-light: #E6F4EC;
+    --blue: #1A56A0; --blue-light: #E8F0FB;
+    --purple: #5B35B5; --purple-light: #EEE9FB;
+    --amber: #B45309; --amber-light: #FEF3C7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; min-height: 100vh; }
+
+  .header { background: var(--red); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 58px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; color: var(--red); }
+  .header h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; color: white; letter-spacing: 0.5px; }
+  .coach-badge { background: rgba(255,255,255,0.2); color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .toolbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toolbar input[type=text] { flex: 1; min-width: 180px; border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-family: 'Barlow', sans-serif; font-size: 13px; background: var(--bg); outline: none; }
+  .toolbar input:focus { border-color: var(--red); background: white; }
+  .filter-select { border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-family: 'Barlow', sans-serif; font-size: 13px; background: var(--bg); outline: none; cursor: pointer; }
+  .filter-select:focus { border-color: var(--red); }
+  .btn-load { background: var(--red); color: white; border: none; border-radius: 7px; padding: 8px 16px; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; }
+  .btn-load:hover { background: var(--red-dark); }
+  .btn-demo { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 7px; padding: 8px 14px; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; text-transform: uppercase; cursor: pointer; }
+  .btn-demo:hover { background: var(--bg); }
+  .btn-clear { background: transparent; color: var(--red); border: 1px solid var(--red-light); border-radius: 7px; padding: 8px 14px; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; text-transform: uppercase; cursor: pointer; }
+
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .stat-cell { background: var(--surface); padding: 14px 20px; text-align: center; }
+  .stat-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; color: var(--red); line-height: 1; }
+  .stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-top: 3px; }
+
+  .main { padding: 20px 24px; }
+
+  .student-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .student-header { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.1s; }
+  .student-header:hover { background: #FAFAF8; }
+  .student-left { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--red); color: white; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .student-name { font-weight: 600; font-size: 15px; }
+  .student-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .student-right { display: flex; align-items: center; gap: 10px; }
+  .overall-prog { text-align: right; }
+  .overall-pct { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; color: var(--red); }
+  .overall-lbl { font-size: 10px; text-transform: uppercase; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; }
+  .chevron { font-size: 14px; color: var(--muted); transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .student-body { border-top: 1px solid var(--border); padding: 16px 18px; display: none; }
+  .student-body.open { display: block; }
+
+  .goal-row { background: var(--bg); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .goal-row:last-child { margin-bottom: 0; }
+  .gr-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .gr-title { font-weight: 600; font-size: 14px; }
+  .gr-cat { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; margin-left: 8px; }
+  .cat-athletic { background: var(--red-light); color: var(--red-dark); }
+  .cat-academic { background: var(--blue-light); color: var(--blue); }
+  .cat-personal { background: var(--purple-light); color: var(--purple); }
+  .cat-teamwork { background: var(--amber-light); color: var(--amber); }
+
+  .smart-pills { display: flex; gap: 4px; margin-bottom: 10px; flex-wrap: wrap; }
+  .sp { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; padding: 2px 7px; border-radius: 4px; }
+  .sp-on { background: var(--green-light); color: var(--green); }
+  .sp-off { background: var(--border); color: #aaa; }
+
+  .prog-section { display: flex; align-items: center; gap: 10px; }
+  .prog-bar { flex: 1; height: 7px; background: white; border-radius: 4px; border: 1px solid var(--border); overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; background: var(--red); transition: width 0.3s; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100px; height: 5px; background: var(--border); border-radius: 3px; outline: none; cursor: pointer; flex-shrink: 0; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--red); cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .prog-pct { font-size: 13px; font-weight: 600; min-width: 36px; text-align: right; color: var(--text); }
+
+  .smart-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: none; }
+  .smart-detail.open { display: block; }
+  .sd-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+  .sd-badge { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .badge-s { background: var(--purple-light); color: var(--purple); }
+  .badge-m { background: var(--blue-light); color: var(--blue); }
+  .badge-a { background: var(--green-light); color: var(--green); }
+  .badge-r { background: var(--amber-light); color: var(--amber); }
+  .badge-t { background: var(--red-light); color: var(--red-dark); }
+  .sd-text { color: var(--muted); line-height: 1.5; }
+  .sd-empty { color: #bbb; font-style: italic; }
+  .toggle-detail { font-size: 11px; color: var(--red); font-weight: 600; background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; margin-top: 6px; }
+
+  .note-area { width: 100%; margin-top: 12px; border: 1px solid var(--border); border-radius: 7px; padding: 9px 12px; font-family: 'Barlow', sans-serif; font-size: 13px; color: var(--text); background: white; outline: none; resize: vertical; min-height: 56px; }
+  .note-area:focus { border-color: var(--red); }
+  .note-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; display: block; }
+
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px; }
+
+  .due-chip { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .due-soon { color: var(--amber); font-weight: 600; }
+  .overdue { color: var(--red); font-weight: 600; }
+
+  @media (max-width: 600px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .toolbar input[type=text] { min-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">MA</div>
+    <h1>Coach Dashboard</h1>
+  </div>
+  <span class="coach-badge">Coach view</span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-cell"><div class="stat-num" id="s-students">0</div><div class="stat-lbl">Athletes</div></div>
+  <div class="stat-cell"><div class="stat-num" id="s-goals">0</div><div class="stat-lbl">Total goals</div></div>
+  <div class="stat-cell"><div class="stat-num" id="s-complete">0</div><div class="stat-lbl">Completed</div></div>
+  <div class="stat-cell"><div class="stat-num" id="s-avg">0%</div><div class="stat-lbl">Avg. progress</div></div>
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="Search athlete name..." oninput="renderDashboard()">
+  <select class="filter-select" id="filter-sport" onchange="renderDashboard()">
+    <option value="">All sports</option>
+    <option>Football</option>
+    <option>Basketball</option>
+    <option>Track & Field</option>
+    <option>Baseball</option>
+    <option>Softball</option>
+    <option>Soccer</option>
+    <option>Wrestling</option>
+    <option>Cross Country</option>
+    <option>Volleyball</option>
+    <option>Other</option>
+  </select>
+  <select class="filter-select" id="filter-cat" onchange="renderDashboard()">
+    <option value="">All categories</option>
+    <option value="athletic">Athletic</option>
+    <option value="academic">Academic</option>
+    <option value="personal">Personal</option>
+    <option value="teamwork">Teamwork</option>
+  </select>
+  <button class="btn-demo" onclick="loadDemo()">Load demo data</button>
+  <button class="btn-clear" onclick="clearAll()">Clear all</button>
+</div>
+
+<div class="main" id="dashboard"></div>
+
+<script>
+const CATS = {athletic:'Athletic',academic:'Academic',personal:'Personal',teamwork:'Teamwork'};
+const CAT_CLASS = {athletic:'cat-athletic',academic:'cat-academic',personal:'cat-personal',teamwork:'cat-teamwork'};
+const SMART_KEYS = ['s','m','a','r','t'];
+const SMART_LABELS = ['S','M','A','R','T'];
+const BADGE_CLASS = {s:'badge-s',m:'badge-m',a:'badge-a',r:'badge-r',t:'badge-t'};
+
+let submissions = [];
+try { submissions = JSON.parse(localStorage.getItem('mars_submissions') || '[]'); } catch(e) {}
+let notes = {};
+try { notes = JSON.parse(localStorage.getItem('mars_coach_notes') || '{}'); } catch(e) {}
+
+function saveNotes() { try { localStorage.setItem('mars_coach_notes', JSON.stringify(notes)); } catch(e) {} }
+function saveSubmissions() { try { localStorage.setItem('mars_submissions', JSON.stringify(submissions)); } catch(e) {} }
+
+function smartScore(g) { return SMART_KEYS.filter(k => g[k] && g[k].trim().length > 5).length; }
+
+function dueStatus(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d - now) / 86400000);
+  if (diff < 0) return `<span class="overdue">Overdue by ${Math.abs(diff)} days</span>`;
+  if (diff <= 7) return `<span class="due-soon">Due in ${diff} day${diff!==1?'s':''}</span>`;
+  return `<span>Due ${d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>`;
+}
+
+function updateStats(filtered) {
+  const allGoals = filtered.flatMap(s => s.goals || []);
+  const done = allGoals.filter(g => (g.progress||0) >= 100).length;
+  const avg = allGoals.length ? Math.round(allGoals.reduce((a,g) => a+(g.progress||0),0)/allGoals.length) : 0;
+  document.getElementById('s-students').textContent = filtered.length;
+  document.getElementById('s-goals').textContent = allGoals.length;
+  document.getElementById('s-complete').textContent = done;
+  document.getElementById('s-avg').textContent = avg + '%';
+}
+
+function renderDashboard() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const sport = document.getElementById('filter-sport').value;
+  const cat = document.getElementById('filter-cat').value;
+
+  let filtered = submissions.filter(s => {
+    const name = (s.fname + ' ' + s.lname).toLowerCase();
+    if (search && !name.includes(search)) return false;
+    if (sport && s.sport !== sport) return false;
+    if (cat && !(s.goals||[]).some(g => g.category === cat)) return false;
+    return true;
+  });
+
+  updateStats(filtered);
+
+  const el = document.getElementById('dashboard');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div style="font-size:40px;margin-bottom:12px;">📋</div>
+      <h3>${submissions.length ? 'No athletes match your search' : 'No submissions yet'}</h3>
+      <p>${submissions.length ? 'Try adjusting your filters.' : 'Students submit goals using the student form. Use "Load demo data" to preview the dashboard.'}</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map((s, si) => {
+    const goals = (s.goals||[]).filter(g => cat ? g.category===cat : true);
+    const allProg = goals.map(g => g.progress||0);
+    const avgProg = allProg.length ? Math.round(allProg.reduce((a,b)=>a+b,0)/allProg.length) : 0;
+    const initials = (s.fname[0]||'?') + (s.lname[0]||'?');
+    const subDate = s.submitted ? new Date(s.submitted).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const realIdx = submissions.indexOf(s);
+
+    return `<div class="student-card" id="sc-${realIdx}">
+      <div class="student-header" onclick="toggleStudent(${realIdx})">
+        <div class="student-left">
+          <div class="avatar">${initials.toUpperCase()}</div>
+          <div>
+            <div class="student-name">${escHtml(s.fname)} ${escHtml(s.lname)}</div>
+            <div class="student-meta">${s.sport||'—'} · Grade ${s.grade||'—'}${subDate ? ' · Submitted '+subDate : ''}</div>
+          </div>
+        </div>
+        <div class="student-right">
+          <div class="overall-prog">
+            <div class="overall-pct">${avgProg}%</div>
+            <div class="overall-lbl">Overall</div>
+          </div>
+          <div class="chevron" id="chev-${realIdx}">▼</div>
+        </div>
+      </div>
+      <div class="student-body" id="sb-${realIdx}">
+        ${goals.map((g, gi) => {
+          const score = smartScore(g);
+          const pills = SMART_LABELS.map((l, j) => {
+            const filled = g[SMART_KEYS[j]] && g[SMART_KEYS[j]].trim().length > 5;
+            return `<span class="sp ${filled?'sp-on':'sp-off'}">${l}</span>`;
+          }).join('');
+          const prog = g.progress || 0;
+          const fillColor = prog>=100 ? '#1D7A4A' : prog>=50 ? '#B45309' : 'var(--red)';
+          const gIdx = (s.goals||[]).indexOf(g);
+          return `<div class="goal-row">
+            <div class="gr-top">
+              <div>
+                <div class="gr-title">${escHtml(g.title)}</div>
+                <div class="due-chip">${dueStatus(g.date)}</div>
+              </div>
+              <span class="gr-cat ${CAT_CLASS[g.category]||'cat-athletic'}">${CATS[g.category]||g.category}</span>
+            </div>
+            <div class="smart-pills">${pills}<span style="font-size:11px;color:var(--muted);margin-left:4px;">${score}/5</span></div>
+            <div class="prog-section">
+              <div class="prog-bar"><div class="prog-fill" id="pf-${realIdx}-${gIdx}" style="width:${prog}%;background:${fillColor};"></div></div>
+              <input type="range" min="0" max="100" step="5" value="${prog}" oninput="updateProg(${realIdx},${gIdx},this.value)" aria-label="Update progress">
+              <span class="prog-pct" id="pp-${realIdx}-${gIdx}">${prog}%</span>
+            </div>
+            ${score > 0 ? `<button class="toggle-detail" onclick="toggleDetail('sd-${realIdx}-${gIdx}',this)">▸ View SMART details</button>
+            <div class="smart-detail" id="sd-${realIdx}-${gIdx}">
+              ${SMART_KEYS.map(k => {
+                const val = g[k] ? g[k].trim() : '';
+                return `<div class="sd-row">
+                  <div class="sd-badge ${BADGE_CLASS[k]}">${k.toUpperCase()}</div>
+                  <div class="${val?'sd-text':'sd-text sd-empty'}">${val || 'Not filled in'}</div>
+                </div>`;
+              }).join('')}
+            </div>` : ''}
+          </div>`;
+        }).join('')}
+        <div style="margin-top:12px;">
+          <span class="note-label">Coach notes</span>
+          <textarea class="note-area" id="note-${realIdx}" placeholder="Add notes about this athlete's progress..." onchange="saveNote(${realIdx})">${notes[realIdx]||''}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStudent(i) {
+  const body = document.getElementById('sb-'+i);
+  const chev = document.getElementById('chev-'+i);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function toggleDetail(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  btn.textContent = el.classList.contains('open') ? '▾ Hide SMART details' : '▸ View SMART details';
+}
+
+function updateProg(si, gi, val) {
+  submissions[si].goals[gi].progress = parseInt(val);
+  saveSubmissions();
+  const pf = document.getElementById(`pf-${si}-${gi}`);
+  const pp = document.getElementById(`pp-${si}-${gi}`);
+  if (pf) { pf.style.width = val+'%'; pf.style.background = val>=100?'#1D7A4A':val>=50?'#B45309':'var(--red)'; }
+  if (pp) pp.textContent = val+'%';
+  updateStats(submissions);
+}
+
+function saveNote(i) {
+  const el = document.getElementById('note-'+i);
+  if (el) { notes[i] = el.value; saveNotes(); }
+}
+
+function clearAll() {
+  if (!confirm('Clear all submissions? This cannot be undone.')) return;
+  submissions = []; notes = {};
+  saveSubmissions(); saveNotes(); renderDashboard();
+}
+
+function loadDemo() {
+  const demo = [
+    { id:1, fname:'Jordan', lname:'Mitchell', sport:'Football', grade:'11th', submitted: new Date(Date.now()-86400000*3).toISOString(), goals:[
+      { title:'Lower 40-yard dash to 4.5 seconds', category:'athletic', date: futureDate(60), s:'Improve my 40-yard dash from 4.8 to 4.5 seconds before playoffs', m:'Track every sprint time weekly using a stopwatch', a:'Train with speed coach 3x/week, add resistance drills', r:'Faster speed = more playing time at wide receiver', t:'By end of regular season', progress:40 },
+      { title:'Maintain 3.0 GPA this semester', category:'academic', date: futureDate(90), s:'Keep grades at or above 3.0 to stay eligible', m:'Track grades weekly on student portal', a:'Use tutoring center Tuesdays, limit video games to weekends', r:'Eligibility and scholarship opportunities', t:'End of semester', progress:75 },
+      { title:'Become a vocal team leader', category:'teamwork', date: futureDate(45), s:'Lead pre-game warmups and call out plays confidently', m:'Coach rates leadership on 1-10 scale weekly', a:'Watch leadership videos, talk to captains', r:'Want to be captain senior year', t:'By mid-season', progress:20 }
+    ]},
+    { id:2, fname:'Aaliyah', lname:'Torres', sport:'Basketball', grade:'10th', submitted: new Date(Date.now()-86400000*1).toISOString(), goals:[
+      { title:'Improve 3-point percentage to 35%', category:'athletic', date: futureDate(50), s:'Shoot 35% from 3-point range in games', m:'Track makes/attempts every game', a:'50 extra 3-point shots daily after practice', r:'Starting spot requires consistent outside shooting', t:'By tournament', progress:60 },
+      { title:'Pass AP History with a B or higher', category:'academic', date: futureDate(80), s:'Score 80%+ on all AP History tests', m:'Test scores and homework grades', a:'Study group Wednesdays with teammates', r:'Need credit for college applications', t:'End of quarter', progress:85 }
+    ]},
+    { id:3, fname:'Marcus', lname:'Webb', sport:'Track & Field', grade:'12th', submitted: new Date().toISOString(), goals:[
+      { title:'Break 4:45 in the mile run', category:'athletic', date: futureDate(30), s:'Run a sub-4:45 mile at the regional qualifier', m:'Mile time on official timer at meets', a:'Interval training 4x/week, add tempo runs', r:'State qualifier cutoff is 4:50', t:'Regional meet in 30 days', progress:55 },
+      { title:'Get accepted to a D1 school', category:'personal', date: futureDate(120), s:'Submit applications to 5 D1 schools with track programs', m:'Applications submitted and decisions received', a:'Request coach recommendation letters by Nov 1', r:"Running is my path to college funding", t:'Applications due Dec 1', progress:30 }
+    ]}
+  ];
+  submissions = demo; notes = {};
+  saveSubmissions(); saveNotes(); renderDashboard();
+}
+
+function futureDate(days) {
+  const d = new Date(); d.setDate(d.getDate()+days);
+  return d.toISOString().split('T')[0];
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
